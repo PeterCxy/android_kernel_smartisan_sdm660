@@ -9817,7 +9817,6 @@ static int ufshcd_devfreq_target(struct device *dev,
 	unsigned long irq_flags;
 	ktime_t start;
 	bool scale_up, sched_clk_scaling_suspend_work = false;
-	bool release_clk_hold = false;
 
 	if (!ufshcd_is_clkscaling_supported(hba))
 		return -EINVAL;
@@ -9842,24 +9841,6 @@ static int ufshcd_devfreq_target(struct device *dev,
 		ret = 0;
 		goto out; /* no state change required */
 	}
-
-	if (ufshcd_is_clkgating_allowed(hba) &&
-	    (hba->clk_gating.state != CLKS_ON)) {
-		if (cancel_work_sync(&hba->clk_gating.gate_work)) {
-			/* hold the vote until the scaling work is completed */
-			hba->clk_gating.active_reqs++;
-			release_clk_hold = true;
-			hba->clk_gating.state = CLKS_ON;
-		} else {
-			/*
-			 * Clock gating work seems to be running in parallel
-			 * hence skip scaling work to avoid deadlock between
-			 * current scaling work and gating work.
-			 */
-			spin_unlock_irqrestore(hba->host->host_lock, irq_flags);
-			return 0;
-		}
-	}
 	spin_unlock_irqrestore(hba->host->host_lock, irq_flags);
 
 	start = ktime_get();
@@ -9872,11 +9853,6 @@ out:
 	if (sched_clk_scaling_suspend_work)
 		queue_work(hba->clk_scaling.workq,
 			   &hba->clk_scaling.suspend_work);
-
-	spin_lock_irqsave(hba->host->host_lock, irq_flags);
-	if (release_clk_hold)
-		__ufshcd_release(hba, false);
-	spin_unlock_irqrestore(hba->host->host_lock, irq_flags);
 
 	return ret;
 }
