@@ -9875,7 +9875,7 @@ out:
 
 	spin_lock_irqsave(hba->host->host_lock, irq_flags);
 	if (release_clk_hold)
-		__ufshcd_release(hba);
+		__ufshcd_release(hba, false);
 	spin_unlock_irqrestore(hba->host->host_lock, irq_flags);
 
 	return ret;
