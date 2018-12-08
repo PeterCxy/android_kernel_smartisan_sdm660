@@ -9845,7 +9845,7 @@ static int ufshcd_devfreq_target(struct device *dev,
 
 	if (ufshcd_is_clkgating_allowed(hba) &&
 	    (hba->clk_gating.state != CLKS_ON)) {
-		if (cancel_delayed_work(&hba->clk_gating.gate_work)) {
+		if (cancel_work_sync(&hba->clk_gating.gate_work)) {
 			/* hold the vote until the scaling work is completed */
 			hba->clk_gating.active_reqs++;
 			release_clk_hold = true;
