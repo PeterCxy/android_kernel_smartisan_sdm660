@@ -1567,7 +1567,7 @@ static ssize_t store_use_migration_notif(
  */
 #define show_gov_pol_sys(file_name)					\
 static ssize_t show_##file_name##_gov_sys				\
-(struct kobject *kobj, struct attribute *attr, char *buf)		\
+(struct kobject *kobj, struct kobj_attribute *attr, char *buf)		\
 {									\
 	return show_##file_name(common_tunables, buf);			\
 }									\
@@ -1580,7 +1580,7 @@ static ssize_t show_##file_name##_gov_pol				\
 
 #define store_gov_pol_sys(file_name)					\
 static ssize_t store_##file_name##_gov_sys				\
-(struct kobject *kobj, struct attribute *attr, const char *buf,		\
+(struct kobject *kobj, struct kobj_attribute *attr, const char *buf,		\
 	size_t count)							\
 {									\
 	return store_##file_name(common_tunables, buf, count);		\
